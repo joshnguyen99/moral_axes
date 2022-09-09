@@ -13,6 +13,14 @@ from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 from nltk.corpus import stopwords
 from spacy.lang.en.stop_words import STOP_WORDS
 
+nltk_stopwords = stopwords.words('english')
+
+stop_words = set(list(nltk_stopwords) +
+                 list(ENGLISH_STOP_WORDS) +
+                 list(STOP_WORDS))
+
+nlp = spacy.load("en_core_web_md")
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Create concepts from word embeddings and lexicons')
@@ -37,49 +45,11 @@ def parse_args():
     return parser.parse_args()
 
 
-args = parse_args()
-
-# Check files' existence
-assert os.path.isfile(args.articles_path), "File for articles not found"
-assert os.path.isfile(args.highlights_path), "File for highlights not found"
-
-# Check if output file already exists
-if os.path.isfile(args.output_path):
-    warnings.warn("Output file already exists. It will be overwritten.")
-
-nltk_stopwords = stopwords.words('english')
-
-stop_words = set(list(nltk_stopwords) +
-                 list(ENGLISH_STOP_WORDS) +
-                 list(STOP_WORDS))
-
-nlp = spacy.load("en_core_web_md")
-
-print("Loading the raw highlights...")
-# Load Highlights
-hl = pd.read_csv(args.highlights_path, index_col=0)
-hl = hl[hl.focus_duration >= 45 * 60]
-# Excluded this person as their number of
-# highlights exceeded the average number of
-# highlights-per-coder by 2 standard deviations
-hl = hl[hl['coder_id'] != 549]
-print("\tNumber of highlights: {}".format(len(hl)))
-print("Finished loading the raw highlights.")
-
-print("Loading the articles...")
-# Load articles
-coded_news = pd.read_pickle(args.articles_path)
-print("\tNumber of articles: {}".format(len(coded_news)))
-print("Finished loading the articles.")
-
-print("Preprocessing the highlights and articles...")
-
-
 def filter_hl(hl):
-    '''
+    """
     Ensures that each document has been coded by at least two coders
     that differed in their assigned foundation
-    '''
+    """
     grouped_doc = hl.groupby(hl.document_id).nunique()
     grouped_doc = grouped_doc[grouped_doc.assigned_domain >= 2]
     grouped_doc = grouped_doc[np.logical_and(
@@ -89,10 +59,6 @@ def filter_hl(hl):
     hl = hl[hl.document_id.isin(keep_docs)]
 
     return hl
-
-
-# Filter the highlights based on number of assigned foundations
-hl = filter_hl(hl)
 
 
 def normalize(s):
@@ -106,16 +72,6 @@ def normalize(s):
     x = re.sub('’', "'", x)
     x = re.sub('\xad', "", x)
     return x
-
-
-# Normalize the articles and highlights by replacing bad characters
-hl["content_normalized"] = hl.content.astype("unicode").map(normalize)
-coded_news["text_normalized"] = coded_news.text.astype(
-    "unicode").map(normalize)
-
-print("Finished preprocessing the highlights and articles.")
-
-print("Constructing the positive and negative examples...")
 
 
 def overlap(intv1, intv2):
@@ -199,51 +155,6 @@ def construct_pos_neg(coded_news, hl, nlp, coder_id, document_id, assigned_domai
     return pos_texts, pos_fs, neg_texts
 
 
-keys = ["authority", "care", "fairness", "loyalty", "sanctity", "none",
-        "authority_seen", "care_seen", "fairness_seen", "loyalty_seen", "sanctity_seen"]
-foundations = ["authority", "care", "fairness", "loyalty", "sanctity"]
-sentence_to_mfs = defaultdict(lambda: {f: 0 for f in keys})
-for coder_id, document_id, assigned_domain in \
-        tqdm(hl.groupby(["coder_id", "document_id", "assigned_domain"]).count().index,
-             desc="Processed", dynamic_ncols=True,
-             unit=" coder-document-assignment"):
-    pos_texts, pos_fs, neg_texts = construct_pos_neg(coded_news=coded_news,
-                                                     hl=hl,
-                                                     nlp=nlp,
-                                                     coder_id=coder_id,
-                                                     document_id=document_id,
-                                                     assigned_domain=assigned_domain)
-    if len(pos_texts) == 0 and len(neg_texts) == 0:
-        continue
-    for t, f in zip(pos_texts, pos_fs):
-        sentence_to_mfs[t][f + "_seen"] += 1
-        sentence_to_mfs[t][f] += 1
-    for t in neg_texts:
-        sentence_to_mfs[t][f + "_seen"] += 1
-        sentence_to_mfs[t]["none"] += 1
-
-print("Constructing table of sentences and their corresponding foundations...")
-df = pd.DataFrame(0, index=sentence_to_mfs.keys(), columns=foundations)
-for t, mf_counts in tqdm(sentence_to_mfs.items(),
-                         desc="Processed",
-                         dynamic_ncols=True,
-                         unit=" sentences"):
-    for f, count in mf_counts.items():
-        df.loc[t, f] = count
-
-df["sentence"] = df.index
-df = df[["sentence", "authority", "care", "fairness", "loyalty", "sanctity", "none",
-         "authority_seen", "care_seen", "fairness_seen", "loyalty_seen", "sanctity_seen"]]
-df.loc[:, "authority":] = df.loc[:, "authority":].astype(int)
-df.index = range(len(df))
-
-print("\tTotal number of sentences: {}".format(len(df)))
-
-print("Finished constructing positive and negative examples.")
-
-print("Preprocessing the sentences...")
-
-
 def preprocess(texts, nlp, progress_bar=False):
     input_type = type(texts)
     if input_type == str:
@@ -292,11 +203,6 @@ def preprocess(texts, nlp, progress_bar=False):
     return tokens
 
 
-def process_df(df):
-    df["tokens"] = preprocess(df.sentence, nlp=nlp, progress_bar=False)
-    return df
-
-
 def parallelize_dataframe(df, func, n_cores=40):
     df_split = np.array_split(df, n_cores)
     pool = Pool(n_cores)
@@ -306,64 +212,156 @@ def parallelize_dataframe(df, func, n_cores=40):
     return df
 
 
-df = parallelize_dataframe(df, process_df, n_cores=args.n_cores)
-# Number of tokens
-df["length"] = df.tokens.map(len)
+def process_df(df):
+    df["tokens"] = preprocess(df.sentence, nlp=nlp, progress_bar=False)
+    return df
 
-# Filtering out sentences with fewer than 3 tokens
-df = df[df.length >= 3]
-df.index = range(len(df))
 
-print("\tNumber of sentences after filtering: {}".format(len(df)))
-print("Finished preprocessing the sentences.")
+if __name__ == "__main__":
 
-print("Splitting the data into training and test sets...")
+    args = parse_args()
 
-foundations = ["authority", "care", "fairness", "loyalty", "sanctity", "none"]
-for foundation in foundations:
-    if foundation == "none":
-        # Seen but not highlighted by anyone
-        y = df[["care", "authority", "fairness",
-                "loyalty", "sanctity"]].max(1) == 0
-        y = y.astype(int)
-        df[f"{foundation}_label"] = 0
-        df.loc[y[y == 1].index, f"{foundation}_label"] = 1
+    # Check files' existence
+    assert os.path.isfile(args.articles_path), "File for articles not found"
+    assert os.path.isfile(args.highlights_path), "File for highlights not found"
 
-        y_train, y_test = train_test_split(df[f"{foundation}_label"],
-                                           test_size=0.1,
-                                           shuffle=True,
-                                           stratify=df[f"{foundation}_label"],
-                                           random_state=100)
+    # Check if output file already exists
+    if os.path.isfile(args.output_path):
+        warnings.warn("Output file already exists. It will be overwritten.")
 
-        df[f"{foundation}_train"] = 0
-        df.loc[y_train.index, f"{foundation}_train"] = 1
-    else:
-        pos = df[foundation] >= 1
-        neg = (df[foundation + "_seen"] >= 1) & (df[foundation] == 0)
-        pos, neg = pos.astype(int), neg.astype(int)
-        # Label explanation:
-        # -1: the sentence has not been seen by anyone assigned this foundation
-        #  0: the sentence has been seen at least once with this foundation,
-        #     but was not highlighted
-        # +1: the sentence has been seen at least once with this foundation,
-        #     and was highlighted at least once
-        df[f"{foundation}_label"] = -1
-        df.loc[pos[pos == 1].index, f"{foundation}_label"] = 1
-        df.loc[neg[neg == 1].index, f"{foundation}_label"] = 0
-        y = df[(df[f"{foundation}_label"] == 0) |
-               (df[f"{foundation}_label"] == 1)][f"{foundation}_label"]
-        y = y.astype(int)
-        y_train, y_test = train_test_split(y, test_size=0.1, shuffle=True,
-                                           stratify=y,
-                                           random_state=100)
-        df[f"{foundation}_train"] = -1
-        df.loc[y_train.index, f"{foundation}_train"] = 1
-        df.loc[y_test.index, f"{foundation}_train"] = 0
+    print("Loading the raw highlights...")
+    # Load Highlights
+    hl = pd.read_csv(args.highlights_path, index_col=0)
+    hl = hl[hl.focus_duration >= 45 * 60]
+    # Excluded this person as their number of
+    # highlights exceeded the average number of
+    # highlights-per-coder by 2 standard deviations
+    hl = hl[hl['coder_id'] != 549]
+    print("\tNumber of highlights: {}".format(len(hl)))
+    print("Finished loading the raw highlights.")
 
-print("Finished train-test-split.")
+    print("Loading the articles...")
+    # Load articles
+    coded_news = pd.read_pickle(args.articles_path)
+    print("\tNumber of articles: {}".format(len(coded_news)))
+    print("Finished loading the articles.")
 
-print("Saving data to CSV file...")
+    print("Preprocessing the highlights and articles...")
 
-df.to_csv(args.output_path)
+    # Filter the highlights based on number of assigned foundations
+    hl = filter_hl(hl)
 
-print("Done.")
+    # Normalize the articles and highlights by replacing bad characters
+    hl["content_normalized"] = hl.content.astype("unicode").map(normalize)
+    coded_news["text_normalized"] = coded_news.text.astype(
+        "unicode").map(normalize)
+
+    print("Finished preprocessing the highlights and articles.")
+
+    print("Constructing the positive and negative examples...")
+
+    keys = ["authority", "care", "fairness", "loyalty", "sanctity", "none",
+            "authority_seen", "care_seen", "fairness_seen", "loyalty_seen", "sanctity_seen"]
+    foundations = ["authority", "care", "fairness", "loyalty", "sanctity"]
+    sentence_to_mfs = defaultdict(lambda: {f: 0 for f in keys})
+    for coder_id, document_id, assigned_domain in \
+            tqdm(hl.groupby(["coder_id", "document_id", "assigned_domain"]).count().index,
+                 desc="Processed", dynamic_ncols=True,
+                 unit=" coder-document-assignment"):
+        pos_texts, pos_fs, neg_texts = construct_pos_neg(coded_news=coded_news,
+                                                         hl=hl,
+                                                         nlp=nlp,
+                                                         coder_id=coder_id,
+                                                         document_id=document_id,
+                                                         assigned_domain=assigned_domain)
+        if len(pos_texts) == 0 and len(neg_texts) == 0:
+            continue
+        for t, f in zip(pos_texts, pos_fs):
+            sentence_to_mfs[t][f + "_seen"] += 1
+            sentence_to_mfs[t][f] += 1
+        for t in neg_texts:
+            sentence_to_mfs[t][f + "_seen"] += 1
+            sentence_to_mfs[t]["none"] += 1
+
+    print("Constructing table of sentences and their corresponding foundations...")
+    df = pd.DataFrame(0, index=sentence_to_mfs.keys(), columns=foundations)
+    for t, mf_counts in tqdm(sentence_to_mfs.items(),
+                             desc="Processed",
+                             dynamic_ncols=True,
+                             unit=" sentences"):
+        for f, count in mf_counts.items():
+            df.loc[t, f] = count
+
+    df["sentence"] = df.index
+    df = df[["sentence", "authority", "care", "fairness", "loyalty", "sanctity", "none",
+             "authority_seen", "care_seen", "fairness_seen", "loyalty_seen", "sanctity_seen"]]
+    df.loc[:, "authority":] = df.loc[:, "authority":].astype(int)
+    df.index = range(len(df))
+
+    print("\tTotal number of sentences: {}".format(len(df)))
+
+    print("Finished constructing positive and negative examples.")
+
+    print("Preprocessing the sentences...")
+
+    df = parallelize_dataframe(df, process_df, n_cores=args.n_cores)
+    # Number of tokens
+    df["length"] = df.tokens.map(len)
+
+    # Filtering out sentences with fewer than 3 tokens
+    df = df[df.length >= 3]
+    df.index = range(len(df))
+
+    print("\tNumber of sentences after filtering: {}".format(len(df)))
+    print("Finished preprocessing the sentences.")
+
+    print("Splitting the data into training and test sets...")
+
+    foundations = ["authority", "care", "fairness", "loyalty", "sanctity", "none"]
+    for foundation in foundations:
+        if foundation == "none":
+            # Seen but not highlighted by anyone
+            y = df[["care", "authority", "fairness",
+                    "loyalty", "sanctity"]].max(1) == 0
+            y = y.astype(int)
+            df[f"{foundation}_label"] = 0
+            df.loc[y[y == 1].index, f"{foundation}_label"] = 1
+
+            y_train, y_test = train_test_split(df[f"{foundation}_label"],
+                                               test_size=0.1,
+                                               shuffle=True,
+                                               stratify=df[f"{foundation}_label"],
+                                               random_state=100)
+
+            df[f"{foundation}_train"] = 0
+            df.loc[y_train.index, f"{foundation}_train"] = 1
+        else:
+            pos = df[foundation] >= 1
+            neg = (df[foundation + "_seen"] >= 1) & (df[foundation] == 0)
+            pos, neg = pos.astype(int), neg.astype(int)
+            # Label explanation:
+            # -1: the sentence has not been seen by anyone assigned this foundation
+            #  0: the sentence has been seen at least once with this foundation,
+            #     but was not highlighted
+            # +1: the sentence has been seen at least once with this foundation,
+            #     and was highlighted at least once
+            df[f"{foundation}_label"] = -1
+            df.loc[pos[pos == 1].index, f"{foundation}_label"] = 1
+            df.loc[neg[neg == 1].index, f"{foundation}_label"] = 0
+            y = df[(df[f"{foundation}_label"] == 0) |
+                   (df[f"{foundation}_label"] == 1)][f"{foundation}_label"]
+            y = y.astype(int)
+            y_train, y_test = train_test_split(y, test_size=0.1, shuffle=True,
+                                               stratify=y,
+                                               random_state=100)
+            df[f"{foundation}_train"] = -1
+            df.loc[y_train.index, f"{foundation}_train"] = 1
+            df.loc[y_test.index, f"{foundation}_train"] = 0
+
+    print("Finished train-test-split.")
+
+    print("Saving data to CSV file...")
+
+    df.to_csv(args.output_path)
+
+    print("Done.")
