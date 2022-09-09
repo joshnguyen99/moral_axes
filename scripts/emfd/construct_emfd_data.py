@@ -203,8 +203,8 @@ keys = ["authority", "care", "fairness", "loyalty", "sanctity", "none",
         "authority_seen", "care_seen", "fairness_seen", "loyalty_seen", "sanctity_seen"]
 foundations = ["authority", "care", "fairness", "loyalty", "sanctity"]
 sentence_to_mfs = defaultdict(lambda: {f: 0 for f in keys})
-for i, (coder_id, document_id, assigned_domain) in \
-        tqdm(enumerate(hl.groupby(["coder_id", "document_id", "assigned_domain"]).count().index),
+for coder_id, document_id, assigned_domain in \
+        tqdm(hl.groupby(["coder_id", "document_id", "assigned_domain"]).count().index,
              desc="Processed", dynamic_ncols=True,
              unit=" coder-document-assignment"):
     pos_texts, pos_fs, neg_texts = construct_pos_neg(coded_news=coded_news,
