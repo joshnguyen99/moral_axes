@@ -117,10 +117,10 @@ if __name__ == "__main__":
 
     print("Removing unnecessary columns...")
 
-    # df = df.drop(["authority", "care", "fairness", "loyalty", "sanctity", "none",
-    #               "authority_seen", "care_seen", "fairness_seen", "loyalty_seen", "sanctity_seen",
-    #               "length"],
-    #              axis=1)
+    df = df.drop(["authority", "care", "fairness", "loyalty", "sanctity", "none",
+                  "authority_seen", "care_seen", "fairness_seen", "loyalty_seen", "sanctity_seen",
+                  "length"],
+                 axis=1)
 
     print("Finished removing unnecessary columns.")
     
