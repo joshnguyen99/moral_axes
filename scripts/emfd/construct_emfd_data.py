@@ -1,7 +1,6 @@
 from collections import defaultdict
 import spacy
 from tqdm import tqdm
-from sklearn.model_selection import train_test_split
 import argparse
 import os
 import warnings
@@ -314,51 +313,6 @@ if __name__ == "__main__":
 
     print("\tNumber of sentences after filtering: {}".format(len(df)))
     print("Finished preprocessing the sentences.")
-
-    print("Splitting the data into training and test sets...")
-
-    foundations = ["authority", "care", "fairness", "loyalty", "sanctity", "none"]
-    for foundation in foundations:
-        if foundation == "none":
-            # Seen but not highlighted by anyone
-            y = df[["care", "authority", "fairness",
-                    "loyalty", "sanctity"]].max(1) == 0
-            y = y.astype(int)
-            df[f"{foundation}_label"] = 0
-            df.loc[y[y == 1].index, f"{foundation}_label"] = 1
-
-            y_train, y_test = train_test_split(df[f"{foundation}_label"],
-                                               test_size=0.1,
-                                               shuffle=True,
-                                               stratify=df[f"{foundation}_label"],
-                                               random_state=100)
-
-            df[f"{foundation}_train"] = 0
-            df.loc[y_train.index, f"{foundation}_train"] = 1
-        else:
-            pos = df[foundation] >= 1
-            neg = (df[foundation + "_seen"] >= 1) & (df[foundation] == 0)
-            pos, neg = pos.astype(int), neg.astype(int)
-            # Label explanation:
-            # -1: the sentence has not been seen by anyone assigned this foundation
-            #  0: the sentence has been seen at least once with this foundation,
-            #     but was not highlighted
-            # +1: the sentence has been seen at least once with this foundation,
-            #     and was highlighted at least once
-            df[f"{foundation}_label"] = -1
-            df.loc[pos[pos == 1].index, f"{foundation}_label"] = 1
-            df.loc[neg[neg == 1].index, f"{foundation}_label"] = 0
-            y = df[(df[f"{foundation}_label"] == 0) |
-                   (df[f"{foundation}_label"] == 1)][f"{foundation}_label"]
-            y = y.astype(int)
-            y_train, y_test = train_test_split(y, test_size=0.1, shuffle=True,
-                                               stratify=y,
-                                               random_state=100)
-            df[f"{foundation}_train"] = -1
-            df.loc[y_train.index, f"{foundation}_train"] = 1
-            df.loc[y_test.index, f"{foundation}_train"] = 0
-
-    print("Finished train-test-split.")
 
     print("Saving data to CSV file...")
 
