@@ -27,16 +27,16 @@ def parse_args():
     parser.add_argument("--articles_path",
                         type=str,
                         help="Path to the file containing the coded news articles. In .pkl format.",
-                        default="coded_news.pkl")
+                        default="data/coded_news.pkl")
     parser.add_argument("--highlights_path",
                         type=str,
                         help="Path to file containing highlights. In .csv format.",
-                        default="highlights_raw.csv"
+                        default="data/highlights_raw.csv"
                         )
     parser.add_argument("--output_path",
                         type=str,
                         help="Path to the output file. In .csv format.",
-                        default="sentence_mf_counts.csv",
+                        default="data/sentence_mf_counts.csv",
                         )
     parser.add_argument("--n_cores",
                         type=int,
