@@ -68,3 +68,36 @@ python score_mfd.py --data $DATA_DIR --text_col $TEXT_COL --version $VERSION \
 ```
 
 The output will be a CSV file with each row representing a text, and each column a score for a foundation (e.g., "care_virtue" if sentiment is true, "care" if sentiment is false).
+
+
+## Constructing the Sentence-MF Dataset
+
+We will process the data used to create the eMFD. The eMFD was created based on news articles and highlights (the portions of each article that were highlighted by the annotators to contain some moral foundation).
+
+### Data sources
+
+Download the following two files and put them into the `data` folder:
+- `coded_news.pkl` from [here](https://osf.io/5r96b). It contains the news articles.
+- `highlights_raw.csv` from [here](https://osf.io/52qfe). It contains the highlights for each article, the foundation each highlight is about, and who annotated each highlight.
+
+### Sentence segmentation and labeling
+
+After downloading the articles and highlights, run the following to create a dataset of sentences and their corresponding foundations.
+```sh
+python construct_emfd_data.py --output_path data/sentence_mf_counts.csv
+```
+The output file `data/sentence_mf_counts.csv` contains the following columns:
+- `authority`,...,`sanctity`: The number of times a sentence was labeled with this foundation.
+- `authority_seen`,...,`sanctity_seen`: How many times a sentence was assigned to be labeled with this foundation. For example, if a sentence has `authority_seen = 1`, it was assigned to be labeled with *authority* once.
+- `none`: The number of times a sentence was not labeled with any foundation.
+
+### Preparing dataset for moral foundations classification
+
+After saving the file for sentence labeling, running the following script will create a dataset for moral foundations one-vs-all classification. 
+```sh
+python prepare_one_vs_all_data.py --output_path data/sentence_mf_one_v_all.csv
+```
+What it does:
+- Create a *label* column, such as `care_label`. If a sentence was *not* assigned to be labeled *care*, the value in this column is `-1`. If a sentence was assigned to be labeled *care* at least once, and at least one annotator labeled it as *care*, then the label is `1`. Otherwise, the label is `0`.
+- Create a *fold* column, such as `care_fold`. Stratified ten-fold cross validation is performed for each `*_label` column, excluding the `-1` because they are unannotated.
+The result is saved in `data/sentence_mf_one_v_all.csv` and will be used to train one-vs-all classifiers.
