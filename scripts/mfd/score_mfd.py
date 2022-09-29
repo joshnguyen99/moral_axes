@@ -7,6 +7,8 @@ import os
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 from nltk.corpus import stopwords
 from spacy.lang.en.stop_words import STOP_WORDS
+import argparse
+import warnings
 
 nltk_stopwords = stopwords.words('english')
 stop_words = set(list(nltk_stopwords) +
@@ -79,7 +81,8 @@ def score_mfd(texts,
                        desc="Scored",
                        disable=not verbose,
                        dynamic_ncols=True,
-                       unit=" docs"):
+                       unit=" docs",
+                       total=len(texts)):
         tokens = [token.text.lower() for token in doc]
         lemmas = [token.lemma_.lower() for token in doc]
         n_tokens = len(tokens)
@@ -154,7 +157,8 @@ def score_emfd(texts,
                        desc="Scored",
                        disable=not verbose,
                        dynamic_ncols=True,
-                       unit=" docs"):
+                       unit=" docs",
+                       total=len(texts)):
         # Preprocess the document like how the eMFD was created
         tokens_df = [[tok.text, tok.ent_type_, tok.tag_] for tok in doc]
         tokens_df = pd.DataFrame(
@@ -219,3 +223,100 @@ def score_emfd(texts,
             scores_df.loc[i, dimension_counts.index] /= dimension_counts
 
     return scores_df
+
+
+def parse_args():
+    parser = argparse.ArgumentParser("Score texts using the Moral Foundations Dictionary.")
+    parser.add_argument("--data",
+                        type=str,
+                        help="Path to the data file (CSV).",
+                        required=True)
+    parser.add_argument("--text_col",
+                        type=str,
+                        help="Name of the column in the data file that contains the texts.",
+                        required=True)
+    parser.add_argument("--version",
+                        type=str,
+                        help="The MFD version.",
+                        default="mfd",
+                        choices=["mfd", "mfd2", "emfd"])
+    parser.add_argument("--normalize",
+                        type=int,
+                        help="Whether to normalize the scores for each text. Normalization differs"
+                        " between MFD (2.0) and eMFD.",
+                        default=1)
+    parser.add_argument("--sentiment",
+                        type=int,
+                        help="Whether to score the sentiment (virtue and vice) of each foundation "
+                             "(1) or not (0).",
+                        default=0)
+    parser.add_argument("--verbose",
+                        type=int,
+                        help="Whether to print messages (1) or not (0).",
+                        default=1)
+    parser.add_argument("--n_jobs",
+                        type=int,
+                        help="Number of jobs to run in parallel when tokenizing texts.",
+                        default=-1)
+    parser.add_argument("--output",
+                        type=str,
+                        help="Path to the output file (CSV).",
+                        required=True)
+    return parser.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_args()
+    data_path = args.data
+    text_col = args.text_col
+    version = args.version
+    normalize = bool(args.normalize)
+    sentiment = bool(args.sentiment)
+    verbose = bool(args.verbose)
+    output_path = args.output
+    n_jobs = args.n_jobs
+
+    # Check if the data file exists
+    assert os.path.exists(data_path), f"Data file does not exist at {data_path}."
+
+    # Check if the output file exists
+    if os.path.exists(output_path):
+        warnings.warn(f"Output file already exists at {output_path}. It will be overwritten.")
+
+    # Load the texts
+    if verbose:
+        print(f"Loading data from {data_path}...")
+    df = pd.read_csv(data_path, usecols=[text_col])
+    texts = df[text_col].to_numpy()
+    del df
+
+    # Score the texts
+    if verbose:
+        print(f"Scoring texts...")
+    if version == "mfd":
+        scores_df = score_mfd(texts,
+                              normalize=normalize,
+                              sentiment=sentiment,
+                              verbose=verbose,
+                              version=1,
+                              n_jobs=n_jobs)
+    elif version == "mfd2":
+        scores_df = score_mfd(texts,
+                              normalize=normalize,
+                              sentiment=sentiment,
+                              verbose=verbose,
+                              version=2,
+                              n_jobs=n_jobs)
+    elif version == "emfd":
+        scores_df = score_emfd(texts,
+                               normalize=normalize,
+                               sentiment=sentiment,
+                               verbose=verbose,
+                               n_jobs=n_jobs)
+
+    if verbose:
+        print(f"Saving scores to {output_path}...")
+    scores_df.to_csv(output_path)
+
+    if verbose:
+        print("Done!")
