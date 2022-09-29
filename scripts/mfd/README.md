@@ -16,7 +16,7 @@ Ensure that the following 3 files are in the `data/lexicons` folder:
 - `eMFD_wordlist.csv`
 
 Then run
-```bash
+```sh
 # Current dir: scripts/mfd
 python build_mfd_lexicons.py
 ```
@@ -38,3 +38,33 @@ After running the script, you should have 3 files in the `data/lexicons` folder:
 - `mfd_original.json`
 - `mfd2.json`
 - `eMFD_wordlist.csv`
+
+
+## Scoring texts using the MFD
+
+Assume you have a CSV file in `corpus.csv` where the texts are in the column `text`. To score these texts, run
+```sh
+# Current dir: scripts/mfd
+# Input file
+DATA_DIR=corpus.csv
+# Name of the column containing the texts
+TEXT_COL=text
+# Dictionary version (mfd, mfd2 or emfd)
+VERSION=mfd2
+# Whether to capture the virtue and vice scores separately
+SENTIMENT=0
+# Whether to normalize the scores
+NORMALIZE=1
+# Print progress
+VERBOSE=1
+# Number of cores used in processing the texts
+N_JOBS=-1
+# Output file
+OUTPUT_FILE=corpus_scores_mfd2.csv
+# Score
+python score_mfd.py --data $DATA_DIR --text_col $TEXT_COL --version $VERSION \
+--sentiment $SENTIMENT --normalize $NORMALIZE --verbose $VERBOSE --n_jobs $N_JOBS \
+--output $OUTPUT_FILE
+```
+
+The output will be a CSV file with each row representing a text, and each column a score for a foundation (e.g., "care_virtue" if sentiment is true, "care" if sentiment is false).
