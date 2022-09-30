@@ -51,6 +51,10 @@ def process_mfd():
             continue
         lexicon[word].append(f"{f}_{sent}")
 
+    # Ensure dimensions are unique
+    for w in lexicon:
+        lexicon[w] = list(set(lexicon[w]))
+
     # Save the lexicon
     with open(NEW_MFD_PATH, "w") as f:
         json.dump(lexicon, f, indent=4)
@@ -76,6 +80,11 @@ def process_mfd2():
                     mfd2[wordkey].extend([nummap[e] for e in ent if e in nummap.keys()])
                 else:
                     nummap[ent[0]] = "_".join(ent[1].split("."))
+
+    # Ensure dimensions are unique
+    for w in mfd2:
+        mfd2[w] = list(set(mfd2[w]))
+
     with open(NEW_MFD2_PATH, "w") as f:
         json.dump(mfd2, f, indent=4)
 
