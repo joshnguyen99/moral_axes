@@ -3,14 +3,18 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import PredefinedSplit, GridSearchCV
 from sklearn.metrics import roc_auc_score, make_scorer
+from sklearn.feature_extraction.text import TfidfTransformer
 import pickle
 import json
 import argparse
+import scipy
 
 FOUNDATIONS = ["authority", "care", "fairness", "loyalty", "sanctity"]
 DATA_PATH = "data/sentence_mf_one_v_all.csv"
 SENTENCE_ROBERTA_EMB_PATH = "data/embeddings/sentence_roberta.npz"
 GLOVE_EMB_PATH = "data/embeddings/glove_twitter_200.npz"
+SPACY_EMB_PATH = "data/embeddings/spacy_300.npz"
+BOW_EMB_PATH = "data/embeddings/bow.npz"
 
 
 def prepare_data(foundation, args):
@@ -41,17 +45,31 @@ def prepare_data(foundation, args):
     y_test = dataset_test[f"{foundation}_label"].values
 
     # Load embeddings
-    # TODO: add more embeddings (bow, tfidf, spacy, etc.)
     if args.embedding == "sentence_roberta":
         emb_path = SENTENCE_ROBERTA_EMB_PATH
+        X = np.load(emb_path)["arr_0"]
     elif args.embedding == "glove":
         emb_path = GLOVE_EMB_PATH
-    X = np.load(emb_path)["arr_0"]
+        X = np.load(emb_path)["arr_0"]
+    elif args.embedding == "spacy":
+        emb_path = SPACY_EMB_PATH
+        X = np.load(emb_path)["arr_0"]
+    elif args.embedding == "bow":
+        emb_path = BOW_EMB_PATH
+        X = scipy.sparse.load_npz(emb_path)
+    else:
+        emb_path = BOW_EMB_PATH
+        X = scipy.sparse.load_npz(emb_path)
 
     assert X.shape[0] == dataset.shape[0]
 
     X_train = X[train_indices]
     X_test = X[test_indices]
+
+    if args.embedding == "tfidf":
+        tfidf = TfidfTransformer()
+        X_train = tfidf.fit_transform(X_train)
+        X_test = tfidf.transform(X_test)
 
     print("Training set size: {}".format(X_train.shape[0]))
     print("Test set size    : {}".format(X_test.shape[0]))
@@ -145,7 +163,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Train logistic regression on MFD dataset.')
     parser.add_argument("-e", "--embedding", type=str, required=True,
                         help="Name of the embedding (sentence_roberta or glove)",
-                        choices=["sentence_roberta", "glove"])
+                        choices=["sentence_roberta", "glove", "spacy", "bow", "tfidf"])
     args = parser.parse_args()
 
     print("USING {} EMBEDDING".format(args.embedding.upper()))
