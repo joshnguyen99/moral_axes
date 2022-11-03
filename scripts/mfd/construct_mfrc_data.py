@@ -28,8 +28,9 @@ def parse_args():
 
 def tokenize_texts(texts, n_cores=1):
     tokens = [[] for _ in texts]
-    for doc in tqdm(nlp.pipe(texts, n_process=n_cores), total=len(texts),
-                    dynamic_ncols=True, leave=False):
+    for i, doc in tqdm(enumerate(nlp.pipe(texts, n_process=n_cores)),
+                       total=len(texts),
+                       dynamic_ncols=True, leave=False):
         tokens[i] = [x.lemma_.lower().strip() for x in doc]
     return tokens
 
