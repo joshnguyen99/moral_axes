@@ -3,7 +3,6 @@ Load the sentence MFD dataset.
 For each foundation, perform k-fold cross validation.
 """
 
-from signal import default_int_handler
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold, train_test_split
