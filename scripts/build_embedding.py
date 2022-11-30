@@ -177,7 +177,7 @@ if __name__ == "__main__":
         if args.verbose:
             print("Creating Spacy embedding...")
         embedding = create_spacy_embedding(texts, progress_bar=args.verbose)
-        np.save(args.output, embedding)
+        np.savez(args.output, embedding)
         if args.verbose:
             print("Saved Spacy embedding to", args.output)
 
@@ -185,7 +185,7 @@ if __name__ == "__main__":
         if args.verbose:
             print("Creating GloVe embedding...")
         embedding = create_glove_embedding(texts, progress_bar=args.verbose)
-        np.save(args.output, embedding)
+        np.savez(args.output, embedding)
         if args.verbose:
             print("Saved GloVe embedding to", args.output)
 
@@ -193,6 +193,6 @@ if __name__ == "__main__":
         if args.verbose:
             print("Creating Sentence RoBERTa embedding...")
         embedding = create_sentence_roberta_embedding(texts, progress_bar=args.verbose)
-        np.save(args.output, embedding)
+        np.savez(args.output, embedding)
         if args.verbose:
             print("Saved Sentence RoBERTa embedding to", args.output)
