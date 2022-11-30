@@ -10,11 +10,11 @@ import argparse
 import scipy
 
 FOUNDATIONS = ["authority", "care", "fairness", "loyalty", "sanctity"]
-DATA_PATH = "data/sentence_mf_one_v_all.csv"
-SENTENCE_ROBERTA_EMB_PATH = "data/embeddings/sentence_roberta.npz"
-GLOVE_EMB_PATH = "data/embeddings/glove_twitter_200.npz"
-SPACY_EMB_PATH = "data/embeddings/spacy_300.npz"
-BOW_EMB_PATH = "data/embeddings/bow.npz"
+DATA_PATH = "mfd/data/mf_corpora_merged.csv"
+SENTENCE_ROBERTA_EMB_PATH = "data/embeddings_for_classifiers/sentence_roberta.npz"
+GLOVE_EMB_PATH = "data/embeddings_for_classifiers/glove_twitter_200.npz"
+SPACY_EMB_PATH = "data/embeddings_for_classifiers/spacy_300.npz"
+BOW_EMB_PATH = "data/embeddings_for_classifiers/bow.npz"
 
 
 def prepare_data(foundation, args):
@@ -173,9 +173,9 @@ if __name__ == "__main__":
         X_train, X_test, y_train, y_test, fold_ids = prepare_data(foundation, args)
         cv_results, final_model = train_cv(X_train, y_train, fold_ids)
 
-        with open(f"data/sentence_classifiers/logreg_{args.embedding}_{foundation}.pkl", "wb") as f:
+        with open(f"mfd/data/sentence_classifiers/logreg_{args.embedding}_{foundation}.pkl", "wb") as f:
             pickle.dump(final_model, f)
-        with open(f"data/mfd_scoring_results/by_foundation/logreg_{args.embedding}_{foundation}_train.json", "w") as f:
+        with open(f"mfd/data/mfd_scoring_results/by_foundation/logreg_{args.embedding}_{foundation}_train.json", "w") as f:
             json.dump(cv_results, f)
 
         # Evaluate on the test set
@@ -188,7 +188,7 @@ if __name__ == "__main__":
             "y_pred": [int(y) for y in y_test_pred],
         }
 
-        with open(f"data/mfd_scoring_results/by_foundation/logreg_{args.embedding}_{foundation}_test.json", "w") as f:
+        with open(f"mfd/data/mfd_scoring_results/by_foundation/logreg_{args.embedding}_{foundation}_test.json", "w") as f:
             json.dump(test_result, f)
 
         print("=" * 80)
