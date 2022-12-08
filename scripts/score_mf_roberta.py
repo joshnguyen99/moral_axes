@@ -116,7 +116,8 @@ if __name__ == "__main__":
     predict_df(df=df,
                text_col=text_col,
                output_path=output_path,
-               device=device)
+               device=device,
+               batch_size=batch_size)
 
     if verbose:
         print("Done!")
