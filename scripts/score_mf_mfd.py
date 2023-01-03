@@ -16,17 +16,17 @@ stop_words = set(list(nltk_stopwords) +
                  list(STOP_WORDS))
 nlp = spacy.load("en_core_web_md")
 
-MFD_PATH = os.path.join("data", "lexicons", "mfd_original.json")
+MFD_PATH = os.path.join("mfd", "data", "lexicons", "mfd_original.json")
 assert os.path.exists(MFD_PATH), f"{MFD_PATH} does not exist"
 with open(MFD_PATH, "r") as f:
     MFD = json.load(f)
 
-MFD2_PATH = os.path.join("data", "lexicons", "mfd2.json")
+MFD2_PATH = os.path.join("mfd", "data", "lexicons", "mfd2.json")
 assert os.path.exists(MFD2_PATH), f"{MFD2_PATH} does not exist"
 with open(MFD2_PATH, "r") as f:
     MFD2 = json.load(f)
 
-EMFD_PATH = os.path.join("data", "lexicons", "eMFD_wordlist.csv")
+EMFD_PATH = os.path.join("mfd", "data", "lexicons", "eMFD_wordlist.csv")
 assert os.path.exists(EMFD_PATH), f"{EMFD_PATH} does not exist"
 with open(EMFD_PATH, "r") as f:
     EMFD = pd.read_csv(EMFD_PATH, index_col="word")
