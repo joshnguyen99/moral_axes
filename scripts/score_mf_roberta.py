@@ -60,7 +60,7 @@ def predict_df(df, text_col, output_path, device="cuda", batch_size=32):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser("Score texts using the Moral Foundations Dictionary.")
+    parser = argparse.ArgumentParser("Score texts using fine-tuned RoBERTa models.")
     parser.add_argument("--data",
                         type=str,
                         help="Path to the data file (CSV).",
