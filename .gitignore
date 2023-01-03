@@ -136,3 +136,6 @@ dmypy.json
 
 # Data files
 data
+figs
+old
+temp
