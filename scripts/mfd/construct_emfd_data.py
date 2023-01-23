@@ -249,6 +249,7 @@ if __name__ == "__main__":
 
     # Filter the highlights based on number of assigned foundations
     hl = filter_hl(hl)
+    print("\tNumber of highlights with at least two assigned foundations: {}".format(len(hl)))
 
     # Normalize the articles and highlights by replacing bad characters
     hl["content_normalized"] = hl.content.astype("unicode").map(normalize)
