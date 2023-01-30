@@ -146,3 +146,8 @@ train_folds = training_set[f'{foundation}_fold']
 test_set = dataset[dataset[f'{foundation}_fold'] == 0]
 X_test, y_test = test_set['sentence'], test_set[f'{foundation}_label']
 ```
+
+## Other datasets
+
+- The [Moral Integrity Corpus](https://github.com/SALT-NLP/mic) by SALT Lab.
+- The [Twitter-Moral Corpus](https://github.com/kmjohnson/twitter-morals) by Purdue NLP.
