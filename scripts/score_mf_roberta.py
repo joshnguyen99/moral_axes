@@ -1,43 +1,11 @@
-from tqdm import tqdm
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import pandas as pd
-import torch
 import os
 import warnings
 import argparse
-import torch
-model_name = "roberta-base"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-
-def load_model(path):
-    state_dict = torch.load(path)["state_dict"]
-    new_state_dict = {}
-    for k, v in state_dict.items():
-        if k.startswith("model."):
-            new_state_dict[k[len("model."):]] = v
-    model = AutoModelForSequenceClassification.from_pretrained(state_dict=new_state_dict,
-                                                               pretrained_model_name_or_path=model_name)
-    return model
-
-
-def predict(X, model, device="cuda:0", batch_size=64):
-    model.to(device)
-    model.eval()
-    y_scores = []
-    with torch.no_grad():
-        for i in tqdm(range(0, len(X), batch_size), total=len(range(0, len(X), batch_size)),
-                      leave=False):
-            x = X[i:i + batch_size]
-            inputs = tokenizer(x, padding=True, truncation=True, return_tensors="pt")
-            inputs = inputs.to(device)
-            outputs = model(**inputs)
-            outputs = torch.softmax(outputs.logits, dim=1)
-            outputs = outputs[:, 1]
-            y_scores.extend(outputs.detach().cpu().numpy())
-    print("LEN", len(y_scores))
-    return y_scores
-
+from utils.roberta_utils import (
+    load_model,  # Load weights from a RobertaForSequenceClassification model
+    predict,  # Use a RobertaForSequenceClassification model to predict a list of texts
+)
 
 labelers = {
     "authority": "/localdata/u7221462/dev/moral-predictor/experiments/merged/one-vs-all-combined/authority/checkpoints/trial-1-20221109-075214-762383/last.ckpt",
