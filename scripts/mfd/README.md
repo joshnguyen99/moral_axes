@@ -83,7 +83,7 @@ The output file `data/sentence_mf_counts.csv` contains the following columns:
 Then, build a one-vs-all dataset for each foundation.
 
 ```sh
-python prepare_one_vs_all_data.py --output_path data/sentence_mf_one_v_all.csv
+python prepare_one_v_all_data.py --output_path data/sentence_mf_one_v_all.csv
 ```
 
 ### Processing the Twitter dataset
