@@ -151,3 +151,6 @@ X_test, y_test = test_set['sentence'], test_set[f'{foundation}_label']
 
 - The [Moral Integrity Corpus](https://github.com/SALT-NLP/mic) by SALT Lab.
 - The [Twitter-Moral Corpus](https://github.com/kmjohnson/twitter-morals) by Purdue NLP.
+- The [Moral Frames Corpus](https://github.com/ShamikRoy/Moral-Role-Prediction) by Purdue NLP.
+- The [Moral Argument Mining Corpus](https://github.com/dwslab/Morality-in-Arguments) by U. Mannheim.
+- The [Social Chemistry Corpus](https://maxwellforbes.com/social-chemistry/) by UW and Allen AI.
