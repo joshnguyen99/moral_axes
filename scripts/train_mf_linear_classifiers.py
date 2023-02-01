@@ -18,9 +18,6 @@ BOW_EMB_PATH = "data/embeddings_for_classifiers/bow.npz"
 
 
 def prepare_data(foundation, args):
-
-    # TODO: adapt to MFTC and MFRC datasets
-
     if foundation not in FOUNDATIONS:
         raise ValueError("Invalid foundation: {}".format(foundation))
 

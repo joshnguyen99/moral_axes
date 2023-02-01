@@ -82,7 +82,7 @@ python score_mf_roberta.py --data $DATA_DIR --text_col $TEXT_COL --verbose $VERB
 --device $DEVICE --batch_size $BATCH_SIZE --output $OUTPUT_FILE
 ```
 
-## Building Embeddings for Logistic Regression
+## Logistic Regression
 
 We will embed the texts in the `mfd/data/mf_corpora_merged.csv` file.
 
@@ -126,3 +126,20 @@ python build_embeddings.py --data $DATA_DIR --text_col $TEXT_COL --output $OUTPU
 OUTPUT_DIR=data/embeddings_for_classifiers/sentence_roberta.npz
 python build_embeddings.py --data $DATA_DIR --text_col $TEXT_COL --output $OUTPUT_DIR --type sentence_roberta
 ```
+
+### Training
+
+First create a folder.
+
+```bash
+mkdir mfd/data/sentence_classifiers
+```
+
+Then train the models.
+
+```bash
+EMBEDDING="glove" # or "bow", "tfidf", "spacy", "sentence_roberta"
+python train_mf_linear_classifiers.py --embedding $EMBEDDING
+```
+
+The models will be saved as `.pkl` files in the `mfd/data/sentence_classifiers` folder. The format is `logreg_{embedding}_{foundation}.pkl`.
