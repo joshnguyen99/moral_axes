@@ -13,7 +13,7 @@ We use several methods of scoring moral foundations in text:
    - A document is transformed into a vector by tokenizing and averaging the embedding of these tokens. This is called the document embedding.
    - To assess the relevance of a document with a concept, we consider the cosine similarity between their embeddings.
 3. Logistic regression. This is a multi-label dataset (i.e., a document can be about more than 1 moral foundation, or none), we set this up as one-vs-all classification task. In other words, we trained a model for each foundation.
-   - Document embeddings:
+   - Document embeddings (go to [the section below](#building-embeddings-for-logistic-regression) for how to build these):
      - Sparse: bag-of-words, tfidf
      - Dense: we take the average of all of its tokens' embeddings. Several token embedding methods are used: GloVe, spaCy, Sentence-RoBERTa.
    - We tune hyperparameter for $\ell_2$ regularization using 10-fold cross validation.
@@ -80,4 +80,49 @@ BATCH_SIZE=32
 # Score
 python score_mf_roberta.py --data $DATA_DIR --text_col $TEXT_COL --verbose $VERBOSE \
 --device $DEVICE --batch_size $BATCH_SIZE --output $OUTPUT_FILE
+```
+
+## Building Embeddings for Logistic Regression
+
+We will embed the texts in the `mfd/data/mf_corpora_merged.csv` file.
+
+```bash
+DATA_DIR=mfd/data/mf_corpora_merged.csv
+TEXT_COL=sentence
+```
+
+### Bag-of-words
+
+```bash
+OUTPUT_DIR=data/embeddings_for_classifiers/bow.npz
+python build_embeddings.py --data $DATA_DIR --text_col $TEXT_COL --output $OUTPUT_DIR --type bow
+```
+
+### TF-IDF
+
+This is based on the bag-of-words embeddings.
+
+```bash
+python bow_to_tfidf_transformers.py
+```
+
+### GloVe
+
+```bash
+OUTPUT_DIR=data/embeddings_for_classifiers/glove_twitter_200.npz
+python build_embeddings.py --data $DATA_DIR --text_col $TEXT_COL --output $OUTPUT_DIR --type glove
+```
+
+### spaCy
+
+```bash
+OUTPUT_DIR=data/embeddings_for_classifiers/spacy_300.npz
+python build_embeddings.py --data $DATA_DIR --text_col $TEXT_COL --output $OUTPUT_DIR --type spacy
+```
+
+### Sentence-RoBERTa
+
+```bash
+OUTPUT_DIR=data/embeddings_for_classifiers/sentence_roberta.npz
+python build_embeddings.py --data $DATA_DIR --text_col $TEXT_COL --output $OUTPUT_DIR --type sentence_roberta
 ```
