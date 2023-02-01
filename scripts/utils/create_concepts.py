@@ -66,7 +66,7 @@ def parse_args():
                         required=True)
     parser.add_argument("--embedding_path",
                         type=str,
-                        help="Path to the word embedding file. Must be in word2vec format.",
+                        help="Path to the word embedding file. Must be in glove format.",
                         required=True,
                         )
     parser.add_argument("--output_path",
@@ -102,7 +102,13 @@ if __name__ == "__main__":
 
     if verbose:
         print("Loading word embedding model...")
-    embedding = KeyedVectors.load_word2vec_format(args.embedding_path, binary=False)
+    # no_header=True because the glove vector file doesn't have the
+    # (number of words, dimension) header default for a typical word2vec file
+    embedding = KeyedVectors.load_word2vec_format(
+        args.embedding_path,
+        binary=False,
+        no_header=True
+    )
 
     if verbose:
         print("Creating concepts...")

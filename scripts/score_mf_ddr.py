@@ -8,8 +8,14 @@ import argparse
 import os
 import warnings
 
-emb_path = "data/word2vec_embeddings/glove.twitter.27B.200d.word2vec"
-embedding = KeyedVectors.load_word2vec_format(emb_path, binary=False)
+emb_path = "data/word2vec_embeddings/glove.twitter.27B.200d.txt"
+# no_header=True because the glove vector file doesn't have the
+# (number of words, dimension) header default for a typical word2vec file
+embedding = KeyedVectors.load_word2vec_format(
+    emb_path,
+    binary=False,
+    no_header=True
+)
 nlp = spacy.load("en_core_web_md")
 
 # Hand-craft a lexicon

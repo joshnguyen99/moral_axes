@@ -82,9 +82,8 @@ def create_glove_embedding(texts, progress_bar=False):
     input_type = type(texts)
     if input_type == str:
         texts = [texts]
-    glove_filename = "data/word2vec_embeddings/glove.twitter.27B.200d"
-    word2vec_output_file = glove_filename + '.word2vec'
-    glove = KeyedVectors.load_word2vec_format(word2vec_output_file, binary=False)
+    glove_filename = "data/word2vec_embeddings/glove.twitter.27B.200d.txt"
+    glove = KeyedVectors.load_word2vec_format(glove_filename, binary=False, no_header=True)
     X_glove = np.zeros((len(texts), 200))
     for i, doc in tqdm(enumerate(nlp.pipe(texts, n_process=-1)),
                        desc="Processed", disable=not progress_bar,
