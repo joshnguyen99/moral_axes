@@ -23,7 +23,6 @@ debugpy==1.6.3
 decorator==5.1.1
 defusedxml==0.7.1
 dnspython==2.2.1
-en-core-web-md==3.1.0
 entrypoints==0.4
 executing==1.0.0
 fastjsonschema==2.16.1
