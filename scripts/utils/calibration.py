@@ -2,6 +2,7 @@
 Scripts for binary clasifier calibration.
 """
 import numpy as np
+from sklearn.calibration import _SigmoidCalibration
 
 
 def calibrate_saerens(y_test_score, y_train):
@@ -64,3 +65,46 @@ def inverse_calibrate_saerens(y_test_score_calibrated, y_train):
         (1 - y_test_score_calibrated + y_test_score_calibrated * neg_to_pos_prop)
 
     return y_test_score
+
+
+def calibrate_platt(y_score, y_true):
+    """
+    Calibrate the scores of a binary classifier using Platt scaling.
+    This is also called sigmoid calibration.
+    Given a score p, the calibrated score is
+        p_calibrated = 1 / (1 + exp(a * p + b))
+    where the parameters a and b are found by maximum likelihood.
+    Platt scaling should be used for a held out dataset, as using it
+    on the test set introduces bias.
+
+    Args:
+        y_true: groud-truth labels.
+        y_score: predicted scores.
+
+    Returns:
+        Calibrated scores.
+        Calibration model of type _SigmoidCalibration, consisting of 
+            slope a and intercept b.
+    """
+
+    model = _SigmoidCalibration()
+    model.fit(X=y_score, y=y_true)
+    return model.predict(T=y_score), model
+
+
+def inverse_calibrate_platt(y_score_calibrated, model: _SigmoidCalibration):
+    """
+    Apply the inverse of the Platt calibration function.
+
+    Args:
+        y_score_calibrated: calibrated scores.
+        model: calibration model of type _SigmoidCalibration, consisting of 
+            slope a and intercept b.
+
+    Returns:
+        The original scores.
+    """
+
+    a, b = model.a_, model.b_
+    y_score = (np.log(1 - y_score_calibrated) - np.log(y_score_calibrated) - b) / a
+    return y_score
