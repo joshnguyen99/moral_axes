@@ -1,5 +1,5 @@
 # Moral Integrity Corpus
-The below is taken from SALT-NLP's [GitHub page](https://github.com/SALT-NLP/mic.git) for the following paper:
+The dataset is taken from SALT-NLP's [GitHub page](https://github.com/SALT-NLP/mic.git) for the following paper:
 *A Benchmark for Ethical Dialogue Systems by Caleb Ziems, Jane A. Yu, Yi-Chia Wang, Alon Y. Halevy, Diyi Yang*
 
 

@@ -24,7 +24,7 @@ python build_social_chem_dataset.py
 
 - We perform inference on the test set. The `split` column indicates which examples are part of this set. )
 
-- After executing the above script, The output will be automatically saved to `scripts/mfd/other_mf_corpora/data/social_chemistry_emnlp2020/data/social_chem_dataset.csv`. The format is
+- After executing the above script, The output will be automatically saved to `scripts/mfd/other_mf_corpora/data/social_chemistry_emnlp2020/data/social_chemistry_dataset.csv`. The format is
 
 |    |           rot | care                                                                                                                      | fairness   | loyalty   | authority   |sanctity|
 |---:|-------------------:|:--------------------------------------------------------------------------------------------------------------------------|:---------------|:--------|:-------------|:-------------|

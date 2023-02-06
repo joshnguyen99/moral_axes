@@ -6,7 +6,7 @@ social_chem_path = './data/social-chem-101.tsv'
 social_chem = pd.read_csv(social_chem_path, sep='\t')
 
 # create test path for all datasets
-social_chem_test_path = './data/social_chem_dataset.csv'
+social_chem_test_path = './data/social_chemistry_dataset.csv'
 
 # create 5 foundation columns
 foundations = ['care','fairness','authority','loyalty','sanctity']
