@@ -20,9 +20,11 @@ python build_moral_args_dataset.py
 ```
 
 **Explanation for `build_moral_args_dataset.py`**: 
-- The original column `MF1`, `MF2` and `MF3` in `dagstuhl_morality_1.csv` and `dagstuhl_morality_2.csv` contains all moral foundations annotated for each argument. We intersect the 2 datasets with `argquality_corpus.csv` on '#id' columns to get text content for each argument.
+- The original column `MF1`, `MF2` and `MF3` in `dagstuhl_morality_1.csv` and `dagstuhl_morality_2.csv` contains all moral foundations annotated for each argument. We join the 2 datasets on 'argument' column to get all the Moral Foundation labels annotated by 2 annonators for each argument.
 
-- After executing the above script, The output will be automatically saved to `scripts/mfd/other_mf_corpora/data/moral_argument_mining_2020/data/moral_args_1_dataset.csv` and `scripts/mfd/other_mf_corpora/data/moral_argument_mining_2020/data/moral_args_2_dataset.csv` for evaluation. 
+- And then join this combined dataset with `argquality_corpus.csv` on '#id' columns to get text content for each argument.
+
+- After executing the above script, The output will be automatically saved to `scripts/mfd/other_mf_corpora/data/moral_argument_mining_2020/data/moral_args_dataset.csv` for evaluation. 
 
 - We will perform inference on the above 2 datasets.
 
