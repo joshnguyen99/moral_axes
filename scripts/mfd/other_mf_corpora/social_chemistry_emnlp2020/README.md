@@ -15,7 +15,7 @@ EMNLP 2020*
 3. Then run 
 
 ```bash
-# Current dir: scripts/mfd/other_mf_corpora/moral_integrity__acl2022
+# Current dir: scripts/mfd/other_mf_corpora/social_chemistry_emnlp2020
 python build_social_chem_dataset.py
 ```
 
