@@ -19,9 +19,11 @@ python build_MIC_dataset.py
 **Explanation for `build_MIC_dataset.py`**: 
 - The original column `moral` in `MIC.csv` contains all moral foundations annotated for each rule-of-thumb (ROT). We ignore `liberty`.
 
-- We perform inference on the test set. The `split` column indicates which examples are part of this set. )
+- We will perform inference on the test set. The `split` column indicates which examples are part of this set. 
 
-- After executing the above script, The output will be automatically saved to `scripts/mfd/other_mf_corpora/moral_integrity_acl2022/data/MIC_dataset.csv`. The format is
+- After executing the script, The output will be automatically saved to `scripts/mfd/other_mf_corpora/moral_integrity_acl2022/data/MIC_dataset.csv`. 
+
+- The final evaluation format is
 
 |    |           rot | care                                                                                                                      | fairness   | loyalty   | authority   |sanctity|
 |---:|-------------------:|:--------------------------------------------------------------------------------------------------------------------------|:---------------|:--------|:-------------|:-------------|
