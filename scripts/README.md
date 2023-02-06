@@ -12,8 +12,8 @@ We use several methods of scoring moral foundations in text:
    - The vector describing the concept *loyalty* is the average of all embeddings for these keywords.
    - A document is transformed into a vector by tokenizing and averaging the embedding of these tokens. This is called the document embedding.
    - To assess the relevance of a document with a concept, we consider the cosine similarity between their embeddings.
-3. Logistic regression. This is a multi-label dataset (i.e., a document can be about more than 1 moral foundation, or none), we set this up as one-vs-all classification task. In other words, we trained a model for each foundation.
-   - Document embeddings (go to [the section below](#building-embeddings-for-logistic-regression) for how to build these):
+3. Logistic regression. This is a multi-label dataset (i.e., a document can be about more than 1 moral foundation, or none), we set this up as one-vs-all classification task. In other words, we trained a model for each foundation. Go to [the section below](#logistic-regression) for how to build these.
+   - Document embeddings:
      - Sparse: bag-of-words, tfidf
      - Dense: we take the average of all of its tokens' embeddings. Several token embedding methods are used: GloVe, spaCy, Sentence-RoBERTa.
    - We tune hyperparameter for $\ell_2$ regularization using 10-fold cross validation.

@@ -16,16 +16,28 @@ FPR_RANGE = np.linspace(0, 1, 100)
 RECALL_RANGE = np.linspace(0, 1, 100)
 
 
-def evaluate_binary_scorer_fold(y_true, y_pred, y_score):
+def evaluate_binary_scorer_fold(y_true, y_score, y_pred=None):
     """
     Evaluate the predictions of a scored binary classifier on one fold.
-    :param y_true: Ground-truth labels (0 or 1) of N elements.
-    :param y_pred: Binary predictions (0 or 1) of N elements.
-    :param y_score: Prediction scores (higher scores = higher degree that an instance
-    is of class 1) of N elements.
-    :return: A dictionary of evaluation metrics
+
+    Args:
+        y_true: Ground-truth labels (0 or 1) of N elements. 
+        y_score: Prediction scores (higher scores = higher degree that an instance
+                 is of class 1) of N elements.
+        y_pred: Binary predictions (0 or 1) of N elements. If None, the predictions
+                are inferred from the scores so that the top half of the scores 
+                become 1.
+
+    Returns:
+        A dictionary of evaluation metrics.
+
     """
     results = dict()
+
+    # Infer y_pred
+    if y_pred is None:
+        median_score = np.median(y_score)
+        y_pred = np.array(y_score >= median_score, dtype=int)
 
     # Binary classification metrics
     results["accuracy"] = accuracy_score(y_true=y_true, y_pred=y_pred)
@@ -96,13 +108,19 @@ def evaluate_binary_scorer(folds,
                            auc_pr_confidence=0.95):
     """
     Evaluate the predictions of a scored binary classifier on k folds.
-    :param folds: A list of dictionaries in the form {"y_true": [], "y_pred": [], "y_score": []}. Each
-    dictionary corresponds to the prediction results for a fold.
-    :param tpr_confidence: Confidence level for true positive rates on the ROC curve
-    :param auc_roc_confidence: Confidence level for the AUC of the ROC curve
-    :param precision_confidence: Confidence level for the precision on the PR curve
-    :param auc_pr_confidence: Confidence level for the AUC of the PR curve
-    :return: A dictionary of evaluation metrics
+
+    Args:
+        folds: A list of dictionaries in the form 
+               {"y_true": [], "y_pred": [], "y_score": []}. Each dictionary 
+               corresponds to the prediction results for a fold.
+        tpr_confidence: Confidence level for true positive rates on the ROC curve
+        auc_roc_confidence: Confidence level for the AUC of the ROC curve
+        precision_confidence: Confidence level for the precision on the PR curve
+        auc_pr_confidence: Confidence level for the AUC of the PR curve
+
+    Returns:
+        A dictionary of evaluation metrics.
+
     """
     results = dict(
         fold_results=[],
@@ -113,7 +131,15 @@ def evaluate_binary_scorer(folds,
     )
     for fold in folds:
         y_true = fold["y_true"]
-        y_pred = fold["y_pred"]
+
+        # Infer y_pred
+        if "y_pred" not in fold:
+            y_score = fold["y_score"]
+            median_score = np.median(y_score)
+            y_pred = np.array(y_score >= median_score, dtype=int)
+        else:
+            y_pred = fold["y_pred"]
+
         y_score = fold["y_score"]
         fold_results = evaluate_binary_scorer_fold(y_true=y_true,
                                                    y_pred=y_pred,
