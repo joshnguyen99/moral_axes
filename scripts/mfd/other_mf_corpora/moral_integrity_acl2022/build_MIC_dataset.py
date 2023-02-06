@@ -1,12 +1,11 @@
 import pandas as pd
 import sys
-# read social chem data
-social_chem_path = './data/social-chem-101.tsv'
-
-social_chem = pd.read_csv(social_chem_path, sep='\t')
+# read mic data
+mic_path = './data/MIC.csv'
+mic = pd.read_csv(mic_path)
 
 # create test path for all datasets
-social_chem_test_path = './data/social_chem_test.csv'
+mic_test_path = './data/MIC_dataset.csv'
 
 # create 5 foundation columns
 foundations = ['care', 'fairness', 'authority', 'loyalty', 'sanctity']
@@ -25,7 +24,7 @@ def convert_rot_to_test(dataframe, columns, path):
 
 def main():
     # convert to the test format: text,'care','fairness','authority','loyalty','sanctity'
-    convert_rot_to_test(social_chem, 'rot-moral-foundations', social_chem_test_path)
+    convert_rot_to_test(mic, 'moral', mic_test_path)
 
 
 if __name__ == "__main__":

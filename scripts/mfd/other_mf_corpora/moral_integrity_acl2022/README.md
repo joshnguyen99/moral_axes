@@ -12,7 +12,7 @@ The dataset is taken from SALT-NLP's [GitHub page](https://github.com/SALT-NLP/m
 3. Then run 
 
 ```bash
-# Current dir: scripts/mfd/other_mf_corpora/moral_integrity__acl2022
+# Current dir: scripts/mfd/other_mf_corpora/moral_integrity_acl2022
 python build_MIC_dataset.py
 ```
 
