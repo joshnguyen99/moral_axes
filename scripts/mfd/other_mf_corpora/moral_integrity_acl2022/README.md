@@ -1,18 +1,18 @@
 # Moral Integrity Corpus
-The dataset is taken from SALT-NLP's [GitHub page](https://github.com/SALT-NLP/mic.git) for the following paper:
+The below is taken from SALT-NLP's [GitHub page](https://github.com/SALT-NLP/mic.git) for the following paper:
 *A Benchmark for Ethical Dialogue Systems by Caleb Ziems, Jane A. Yu, Yi-Chia Wang, Alon Y. Halevy, Diyi Yang*
 
 
 ## Data
 1. Download the dataset [here](https://www.dropbox.com/sh/m46z42nce8x0ttk/AABuSZiA6ESyrJNWmgTPrfuRa?dl=0). Save the `MIC.csv` file to `data`.
 
-2. Ensure the `MIC.csv` file is saved in `scripts/mfd/other_mf_corpora/moral_integrity_acl2022/data`:
+2. Ensure the `MIC.csv` file is saved in `scripts/mfd/other_mf_corpora/moral_integrity_acl2022/data`
 
 
 3. Then run 
 
 ```bash
-# Current dir: scripts/mfd/other_mf_corpora/moral_integrity__acl2022
+# Current dir: scripts/mfd/other_mf_corpora/moral_integrity_acl2022
 python build_MIC_dataset.py
 ```
 
@@ -21,7 +21,7 @@ python build_MIC_dataset.py
 
 - We perform inference on the test set. The `split` column indicates which examples are part of this set. )
 
-- After executing the above script, The output will be automatically saved to `scripts/mfd/other_mf_corpora/data/MIC_dataset.csv`. The format is
+- After executing the above script, The output will be automatically saved to `scripts/mfd/other_mf_corpora/moral_integrity_acl2022/data/MIC_dataset.csv`. The format is
 
 |    |           rot | care                                                                                                                      | fairness   | loyalty   | authority   |sanctity|
 |---:|-------------------:|:--------------------------------------------------------------------------------------------------------------------------|:---------------|:--------|:-------------|:-------------|
