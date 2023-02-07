@@ -59,10 +59,10 @@ def calibrate_saerens(y_test_score, y_train):
     neg_to_pos_prop = (1 - train_pos_prop) / train_pos_prop
 
     # Calibrate the test scores
-    y_test_score_calibrated = \
-        y_test_score / (y_test_score + neg_to_pos_prop * (1 - y_test_score))
+    model = CalibratorSaerens(neg_to_pos_prop)
+    y_test_score_calibrated = model.predict(T=y_test_score)
 
-    return y_test_score_calibrated
+    return y_test_score_calibrated, model
 
 
 def inverse_calibrate_saerens(y_test_score_calibrated, y_train):
