@@ -3,6 +3,30 @@ Scripts for binary clasifier calibration.
 """
 import numpy as np
 from sklearn.calibration import _SigmoidCalibration
+from sklearn.isotonic import IsotonicRegression
+
+
+class Calibrator:
+    """
+    Base class for calibrators. Each calibrator should implement
+    the method predict to transform the scores by a binary classifier.
+    """
+
+    def __init__(self):
+        pass
+
+    def predict(self, T):
+        pass
+
+
+class CalibratorSaerens(Calibrator):
+    def __init__(self, neg_to_pos_prop):
+        super().__init__()
+        self.neg_to_pos_prop = neg_to_pos_prop
+
+    def predict(self, T):
+        y_score_calibrated = T / (T + self.neg_to_pos_prop * (1 - T))
+        return y_score_calibrated
 
 
 def calibrate_saerens(y_test_score, y_train):
@@ -24,7 +48,8 @@ def calibrate_saerens(y_test_score, y_train):
 
     Returns:
         Calibrated scores for test examples. Array or float, depending on
-        the type of y_test_score.
+            the type of y_test_score.
+        Calibration model. This can be called for new test scores.
     """
 
     # Proportion of positive examples in the training set
@@ -108,3 +133,21 @@ def inverse_calibrate_platt(y_score_calibrated, model: _SigmoidCalibration):
     a, b = model.a_, model.b_
     y_score = (np.log(1 - y_score_calibrated) - np.log(y_score_calibrated) - b) / a
     return y_score
+
+
+def calibrate_isotonic(y_score, y_true):
+    """
+    Calibrate the scores of a binary classifier using isotonic regression.
+
+    Args:
+        y_true: groud-truth labels.
+        y_score: predicted scores.
+
+    Returns:
+        Calibrated scores.
+        Calibration model of type IsotonicRegression.
+    """
+
+    model = IsotonicRegression(out_of_bounds="clip")
+    model.fit(X=y_score, y=y_true)
+    return model.predict(T=y_score), model
