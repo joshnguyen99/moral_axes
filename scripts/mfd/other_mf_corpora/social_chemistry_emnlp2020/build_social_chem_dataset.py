@@ -17,7 +17,7 @@ def convert_rot_to_test(dataframe, columns, path):
     for foundation in foundations:
         dataframe[foundation] = 0
         dataframe.loc[dataframe[columns].notnull() & dataframe[columns].str.contains(foundation), foundation] = 1
-    dataframe_test = dataframe[dataframe['split'] == 'dev'][[
+    dataframe_test = dataframe[dataframe['split'] == 'test'][[
         'rot', 'care', 'fairness', 'loyalty', 'authority', 'sanctity']]
 
     dataframe_test.to_csv(path)
