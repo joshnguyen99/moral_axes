@@ -8,6 +8,8 @@ arXiv: https://doi.org/10.48550/arXiv.2311.10219.
 
 ## Check out the demo of our Mformer models via this 🤗 [Hugging Face space](https://huggingface.co/spaces/joshnguyen/mformer)!
 
+![](/screenshots/mformer-demo.png)
+
 ## Loading Mformer locally
 
 The 5 Mformer models are available on Hugging Face.
